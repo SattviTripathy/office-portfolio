@@ -24,6 +24,10 @@
   #knob{position:absolute;left:50%;top:50%;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.7);transform:translate(-50%,-50%);pointer-events:none;}
   #openbtn{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#1d6b8a;color:#fff;font:600 15px system-ui;border:none;padding:13px 24px;border-radius:24px;display:none;z-index:6;box-shadow:0 2px 10px rgba(0,0,0,0.25);}
   @media (pointer:coarse){#joy{display:block;} .label{font-size:15px;padding:5px 12px;} #help{font-size:12px;max-width:46vw;} #hint{display:none;}}
+  #intro{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:#fff;background:rgba(22,30,40,0.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);transition:opacity .5s;}
+  #intro h1{font:600 30px system-ui;margin:0 0 8px;}
+  #intro p{font:400 15px system-ui;opacity:0.88;margin:0 0 24px;max-width:300px;line-height:1.55;}
+  #enter{font:600 16px system-ui;color:#1d2630;background:#fff;border:none;padding:14px 30px;border-radius:26px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,0.3);}
 </style>
 </head>
 <body>
@@ -34,6 +38,7 @@
 <button id="openbtn"></button>
 <div id="joy"><div id="knob"></div></div>
 <div id="loading">Loading 3D scene…</div>
+<div id="intro"><h1>Sattvi's office</h1><p>Walk around and step up to anything that catches your eye to open it.</p><button id="enter">Enter the room &rsaquo;</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function(){
@@ -54,23 +59,45 @@
   const hint=document.getElementById('hint'), banner=document.getElementById('banner');
   const renderer=new THREE.WebGLRenderer({antialias:true});
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   stage.appendChild(renderer.domElement);
   function size(){const w=stage.clientWidth,h=stage.clientHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();}
 
-  const scene=new THREE.Scene(); scene.background=new THREE.Color(0xcdd6df);
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0xdde1e8);
   const camera=new THREE.PerspectiveCamera(55,1,0.1,100);
-  scene.add(new THREE.AmbientLight(0xffffff,0.75));
-  const dir=new THREE.DirectionalLight(0xffffff,0.7); dir.position.set(6,12,4); scene.add(dir);
+  scene.add(new THREE.HemisphereLight(0xfff5e6,0xb9b29c,0.7));
+  const dir=new THREE.DirectionalLight(0xfff1dd,0.85); dir.position.set(7,13,5); dir.castShadow=true;
+  dir.shadow.mapSize.set(2048,2048); const sc=dir.shadow.camera; sc.left=-12;sc.right=12;sc.top=12;sc.bottom=-12;sc.near=1;sc.far=45; dir.shadow.bias=-0.0008; scene.add(dir);
+  const lamp=new THREE.PointLight(0xffe6b8,0.45,22,2); lamp.position.set(0,2.7,0.5); scene.add(lamp);
 
   const room={hx:8,hz:6,wh:3};
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(room.hx*2,room.hz*2), new THREE.MeshStandardMaterial({color:0xddd6c4}));
-  floor.rotation.x=-Math.PI/2; scene.add(floor);
-  const grid=new THREE.GridHelper(room.hz*2,12,0xb8b09a,0xc7c0ac); grid.position.y=0.01; grid.scale.x=(room.hx*2)/(room.hz*2); scene.add(grid);
-  const wallMat=new THREE.MeshStandardMaterial({color:0xe7e1d3});
-  function wall(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat); m.position.set(x,y,z); scene.add(m);}
+  function makeTex(draw,rx,ry){const c=document.createElement('canvas');c.width=c.height=256;draw(c.getContext('2d'));const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rx,ry);t.anisotropy=4;return t;}
+  const woodTex=makeTex(x=>{x.fillStyle='#c19a5b';x.fillRect(0,0,256,256);for(let i=0;i<256;i+=42){x.fillStyle='rgba(80,52,24,0.30)';x.fillRect(0,i,256,3);}for(let g=0;g<70;g++){x.strokeStyle='rgba(110,76,38,'+(0.04+Math.random()*0.09)+')';x.lineWidth=1;x.beginPath();const y=Math.random()*256;x.moveTo(0,y);x.bezierCurveTo(80,y+(Math.random()*10-5),176,y+(Math.random()*10-5),256,y);x.stroke();}},6,5);
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(room.hx*2,room.hz*2), new THREE.MeshStandardMaterial({map:woodTex,roughness:0.9}));
+  floor.rotation.x=-Math.PI/2; floor.receiveShadow=true; scene.add(floor);
+  const rugTex=makeTex(x=>{x.fillStyle='#3f7d72';x.fillRect(0,0,256,256);x.strokeStyle='#e8ddc4';x.lineWidth=14;x.strokeRect(20,20,216,216);x.strokeStyle='rgba(232,221,196,0.5)';x.lineWidth=4;x.strokeRect(42,42,172,172);},1,1);
+  const rug=new THREE.Mesh(new THREE.PlaneGeometry(6,4), new THREE.MeshStandardMaterial({map:rugTex,roughness:1}));
+  rug.rotation.x=-Math.PI/2; rug.position.set(0,0.02,0.8); rug.receiveShadow=true; scene.add(rug);
+
+  const wallMat=new THREE.MeshStandardMaterial({color:0xe7e1d3,roughness:0.95});
+  function wall(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat); m.position.set(x,y,z); m.receiveShadow=true; scene.add(m); return m;}
   wall(room.hx*2,room.wh,0.3,0,room.wh/2,-room.hz);
   wall(0.3,room.wh,room.hz*2,-room.hx,room.wh/2,0);
   wall(0.3,room.wh,room.hz*2, room.hx,room.wh/2,0);
+  function baseboard(w,d,x,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,0.18,d),mat(0xb7ad93));m.position.set(x,0.09,z);scene.add(m);}
+  baseboard(room.hx*2,0.34,0,-room.hz+0.17);
+  baseboard(0.34,room.hz*2,-room.hx+0.17,0);
+  baseboard(0.34,room.hz*2, room.hx-0.17,0);
+  // daylight window on the back wall
+  const winFrame=new THREE.Mesh(new THREE.BoxGeometry(2.7,1.8,0.12),mat(0x6b5b4a)); winFrame.position.set(4.2,1.95,-room.hz+0.16); scene.add(winFrame);
+  const sky=new THREE.Mesh(new THREE.PlaneGeometry(2.3,1.4),new THREE.MeshBasicMaterial({color:0xbfe3ff})); sky.position.set(4.2,1.95,-room.hz+0.23); scene.add(sky);
+  const bar=()=>mat(0x6b5b4a);
+  const barV=new THREE.Mesh(new THREE.BoxGeometry(0.07,1.4,0.07),bar()); barV.position.set(4.2,1.95,-room.hz+0.25); scene.add(barV);
+  const barH=new THREE.Mesh(new THREE.BoxGeometry(2.3,0.07,0.07),bar()); barH.position.set(4.2,1.95,-room.hz+0.25); scene.add(barH);
+  // hanging ceiling lamp
+  const lampShade=new THREE.Mesh(new THREE.ConeGeometry(0.45,0.4,16,1,true),new THREE.MeshStandardMaterial({color:0x33414f,side:THREE.DoubleSide})); lampShade.position.set(0,2.85,0.5); scene.add(lampShade);
+  const lampCord=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.3,6),mat(0x222a32)); lampCord.position.set(0,3.1,0.5); scene.add(lampCord);
+  const bulb=new THREE.Mesh(new THREE.SphereGeometry(0.1,10,8),new THREE.MeshBasicMaterial({color:0xffe6b8})); bulb.position.set(0,2.72,0.5); scene.add(bulb);
 
   const props=[];
   function addProp(id,label,maps,labelY,box,build){
@@ -78,7 +105,7 @@
     props.push({id,label,maps,labelY,box,meshes,el:null});
   }
   function mat(c){return new THREE.MeshStandardMaterial({color:c});}
-  function part(g,meshes,geo,m,x,y,z){const me=new THREE.Mesh(geo,m); me.position.set(x,y,z); g.add(me); meshes.push(me); return me;}
+  function part(g,meshes,geo,m,x,y,z){const me=new THREE.Mesh(geo,m); me.position.set(x,y,z); me.castShadow=true; me.receiveShadow=true; g.add(me); meshes.push(me); return me;}
 
   addProp('desk','Momentum','pomodoro productivity app',1.7,{minx:-1.6,maxx:1.6,minz:-5.7,maxz:-4.3},(g,m)=>{
     part(g,m,new THREE.BoxGeometry(3,0.15,1.2),mat(0x6b5b8a),0,1.0,-5);
@@ -117,6 +144,7 @@
   const legR=legL.clone(); legR.position.x=0.13; player.add(legR);
   const armL=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.55,0.18),shirt); armL.position.set(-0.33,1.0,0); player.add(armL);
   const armR=armL.clone(); armR.position.x=0.33; player.add(armR);
+  player.traverse(o=>{if(o.isMesh)o.castShadow=true;});
   player.position.set(0,0,1);
 
   const keys={};
@@ -202,6 +230,9 @@
     renderer.render(scene,camera);
     requestAnimationFrame(frame);
   }
+  const intro=document.getElementById('intro'), enter=document.getElementById('enter');
+  if(enter)enter.addEventListener('click',()=>{intro.style.opacity='0';setTimeout(()=>intro.remove(),500);});
+
   size(); addEventListener('resize',size); frame();
 })();
 </script>
