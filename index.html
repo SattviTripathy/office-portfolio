@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Office Portfolio</title>
+<style>
+  html,body{margin:0;height:100%;background:#cdd6df;font-family:system-ui,sans-serif;overflow:hidden;}
+  #stage{position:fixed;inset:0;touch-action:none;cursor:grab;}
+  #stage canvas{display:block;width:100%;height:100%;}
+  #labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;}
+  .label{position:absolute;transform:translate(-50%,-50%);font:600 13px system-ui,sans-serif;
+    padding:4px 10px;border-radius:11px;white-space:nowrap;background:rgba(255,255,255,0.92);color:#4a4640;
+    transition:background .15s,color .15s;}
+  #hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);font:500 14px system-ui;
+    color:#1d6b8a;background:rgba(255,255,255,0.9);padding:6px 14px;border-radius:8px;min-height:16px;
+    opacity:0;transition:opacity .15s;}
+  #help{position:fixed;left:16px;top:14px;font:13px system-ui;color:#4a4640;background:rgba(255,255,255,0.85);
+    padding:8px 12px;border-radius:8px;line-height:1.5;}
+  #banner{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:#fff;border:1px solid #c9c2b3;
+    border-radius:8px;padding:9px 16px;font:13px system-ui;color:#4a4640;opacity:0;transition:opacity .25s;pointer-events:none;}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font:14px system-ui;color:#5f6b78;}
+</style>
+</head>
+<body>
+<div id="stage"><div id="labels"></div></div>
+<div id="help"><b>WASD</b> walk &middot; <b>drag</b> to look &middot; <b>E</b> / click prop to open</div>
+<div id="hint"></div>
+<div id="banner"></div>
+<div id="loading">Loading 3D scene…</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  if(typeof THREE==='undefined'){document.getElementById('loading').textContent='Could not load 3D library (check your internet connection).';return;}
+  document.getElementById('loading').remove();
+
+  // ---- EDIT THIS: map each prop to one of your GitHub projects ----
+  // Set `url` to open the real project. Leave '' to just show a placeholder banner.
+  const LINKS = {
+    desk:  'https://github.com/SattviTripathy/Momentum',        // Momentum (pomodoro app)
+    plant: 'https://github.com/SattviTripathy/materiality-map', // Materiality Map (ESG)
+    shelf: 'https://github.com/SattviTripathy/portfolio',       // Portfolio
+    board: ''                                                   // open slot for your next project
+  };
+  // -----------------------------------------------------------------
+
+  const stage=document.getElementById('stage'), labelsEl=document.getElementById('labels');
+  const hint=document.getElementById('hint'), banner=document.getElementById('banner');
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  stage.appendChild(renderer.domElement);
+  function size(){const w=stage.clientWidth,h=stage.clientHeight; renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix();}
+
+  const scene=new THREE.Scene(); scene.background=new THREE.Color(0xcdd6df);
+  const camera=new THREE.PerspectiveCamera(55,1,0.1,100);
+  scene.add(new THREE.AmbientLight(0xffffff,0.75));
+  const dir=new THREE.DirectionalLight(0xffffff,0.7); dir.position.set(6,12,4); scene.add(dir);
+
+  const room={hx:8,hz:6,wh:3};
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(room.hx*2,room.hz*2), new THREE.MeshStandardMaterial({color:0xddd6c4}));
+  floor.rotation.x=-Math.PI/2; scene.add(floor);
+  const grid=new THREE.GridHelper(room.hz*2,12,0xb8b09a,0xc7c0ac); grid.position.y=0.01; grid.scale.x=(room.hx*2)/(room.hz*2); scene.add(grid);
+  const wallMat=new THREE.MeshStandardMaterial({color:0xe7e1d3});
+  function wall(w,h,d,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat); m.position.set(x,y,z); scene.add(m);}
+  wall(room.hx*2,room.wh,0.3,0,room.wh/2,-room.hz);
+  wall(0.3,room.wh,room.hz*2,-room.hx,room.wh/2,0);
+  wall(0.3,room.wh,room.hz*2, room.hx,room.wh/2,0);
+
+  const props=[];
+  function addProp(id,label,maps,labelY,box,build){
+    const g=new THREE.Group(); scene.add(g); const meshes=[]; build(g,meshes);
+    props.push({id,label,maps,labelY,box,meshes,el:null});
+  }
+  function mat(c){return new THREE.MeshStandardMaterial({color:c});}
+  function part(g,meshes,geo,m,x,y,z){const me=new THREE.Mesh(geo,m); me.position.set(x,y,z); g.add(me); meshes.push(me); return me;}
+
+  addProp('desk','Momentum','pomodoro productivity app',1.7,{minx:-1.6,maxx:1.6,minz:-5.7,maxz:-4.3},(g,m)=>{
+    part(g,m,new THREE.BoxGeometry(3,0.15,1.2),mat(0x6b5b8a),0,1.0,-5);
+    part(g,m,new THREE.BoxGeometry(0.15,1.0,1.0),mat(0x5a4b78),-1.35,0.5,-5);
+    part(g,m,new THREE.BoxGeometry(0.15,1.0,1.0),mat(0x5a4b78),1.35,0.5,-5);
+    part(g,m,new THREE.BoxGeometry(1.0,0.6,0.08),mat(0x2a2740),0,1.45,-5.2);
+    part(g,m,new THREE.BoxGeometry(0.9,0.5,0.02),mat(0x8fd3ff),0,1.45,-5.15);
+    part(g,m,new THREE.BoxGeometry(0.6,0.04,0.3),mat(0x3a3550),0,1.1,-4.7);
+  });
+  addProp('plant','Materiality map','ESG solution',1.6,{minx:4.4,maxx:5.6,minz:3.4,maxz:4.6},(g,m)=>{
+    part(g,m,new THREE.CylinderGeometry(0.35,0.28,0.6,12),mat(0xb07d4b),5,0.3,4);
+    part(g,m,new THREE.SphereGeometry(0.55,12,10),mat(0x2f8f5b),5,1.0,4);
+    part(g,m,new THREE.SphereGeometry(0.35,10,8),mat(0x3aa869),4.7,1.35,4.1);
+    part(g,m,new THREE.SphereGeometry(0.35,10,8),mat(0x3aa869),5.3,1.3,3.9);
+  });
+  addProp('shelf','Portfolio','my body of work',3.3,{minx:6.4,maxx:7.6,minz:-1.6,maxz:1.6},(g,m)=>{
+    part(g,m,new THREE.BoxGeometry(0.7,3.0,3.0),mat(0x9a6b3f),7,1.5,0);
+    const cols=[0xc95b4b,0x4a8db5,0xe0b04a,0x5b9e6a,0xd07b3f];
+    for(let r=0;r<4;r++){for(let b=0;b<5;b++){part(g,m,new THREE.BoxGeometry(0.45,0.5,0.2),mat(cols[(r+b)%5]),6.7,0.6+r*0.7,-1.0+b*0.5);}}
+  });
+  addProp('board','Coming soon','your next project',2.4,{minx:-7.7,maxx:-7.2,minz:-1.4,maxz:1.4},(g,m)=>{
+    part(g,m,new THREE.BoxGeometry(0.12,1.6,2.6),mat(0xeef3f6),-7.7,1.8,0);
+    part(g,m,new THREE.BoxGeometry(0.13,0.05,2.0),mat(0x4a8db5),-7.65,2.2,0);
+    part(g,m,new THREE.BoxGeometry(0.13,0.05,1.6),mat(0xe0b04a),-7.65,1.9,0.2);
+    part(g,m,new THREE.BoxGeometry(0.13,0.05,1.2),mat(0xc95b4b),-7.65,1.6,-0.1);
+  });
+
+  props.forEach(p=>{const el=document.createElement('div'); el.className='label'; el.textContent=p.label; labelsEl.appendChild(el); p.el=el;});
+
+  const player=new THREE.Group(); scene.add(player);
+  const skin=mat(0xf2c79b), shirt=mat(0x2f6f8f), pants=mat(0x394150);
+  const torso=new THREE.Mesh(new THREE.BoxGeometry(0.5,0.7,0.28),shirt); torso.position.y=1.0; player.add(torso);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.23,14,12),skin); head.position.y=1.55; player.add(head);
+  const hair=new THREE.Mesh(new THREE.SphereGeometry(0.24,14,12,0,Math.PI*2,0,Math.PI*0.55),mat(0x3a2f28)); hair.position.y=1.6; player.add(hair);
+  const legL=new THREE.Mesh(new THREE.BoxGeometry(0.18,0.6,0.2),pants); legL.position.set(-0.13,0.4,0); player.add(legL);
+  const legR=legL.clone(); legR.position.x=0.13; player.add(legR);
+  const armL=new THREE.Mesh(new THREE.BoxGeometry(0.13,0.55,0.18),shirt); armL.position.set(-0.33,1.0,0); player.add(armL);
+  const armR=armL.clone(); armR.position.x=0.33; player.add(armR);
+  player.position.set(0,0,1);
+
+  const keys={};
+  addEventListener('keydown',e=>{const k=e.key.toLowerCase(); if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault(); keys[k]=true; if(k==='e')interact();});
+  addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+
+  let theta=Math.PI, dist=5.2, camH=2.6, look=null;
+  function pt(e){const r=renderer.domElement.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height};}
+  stage.addEventListener('pointerdown',e=>{const p=pt(e); if(raycastProp(p))return; look={x:e.clientX,id:e.pointerId}; stage.setPointerCapture(e.pointerId); stage.style.cursor='grabbing';});
+  stage.addEventListener('pointermove',e=>{if(look&&e.pointerId===look.id){theta-=(e.clientX-look.x)*0.01; look.x=e.clientX;}});
+  function endPtr(e){if(look&&e.pointerId===look.id){look=null;stage.style.cursor='grab';}}
+  stage.addEventListener('pointerup',endPtr); stage.addEventListener('pointercancel',endPtr);
+
+  const ray=new THREE.Raycaster(), ndc=new THREE.Vector2();
+  function raycastProp(p){
+    ndc.x=(p.x/p.w)*2-1; ndc.y=-(p.y/p.h)*2+1; ray.setFromCamera(ndc,camera);
+    const hit=ray.intersectObjects(props.flatMap(pr=>pr.meshes),false)[0];
+    if(!hit)return false;
+    let found=null; props.forEach(pr=>{if(pr.meshes.includes(hit.object))found=pr;});
+    if(found){ if(found===nearest())interact(); else showBanner('Walk closer to '+found.label+' first'); return true; }
+    return false;
+  }
+  function nearest(){let best=null,bd=1e9; for(const p of props){const cx=(p.box.minx+p.box.maxx)/2,cz=(p.box.minz+p.box.maxz)/2; const d=Math.hypot(player.position.x-cx,player.position.z-cz); const reach=Math.max(p.box.maxx-p.box.minx,p.box.maxz-p.box.minz)/2+1.6; if(d<reach&&d<bd){bd=d;best=p;}} return best;}
+  function interact(){const p=nearest(); if(!p)return; const url=LINKS[p.id]; if(url&&!url.includes('YOUR_USERNAME')){window.open(url,'_blank');} else {showBanner('Would open: '+p.label+'  ·  set its link in the LINKS map');}}
+  function showBanner(t){banner.textContent=t;banner.style.opacity=1;clearTimeout(showBanner._t);showBanner._t=setTimeout(()=>banner.style.opacity=0,2400);}
+
+  function blocked(x,z){
+    if(x<-room.hx+0.5||x>room.hx-0.5||z<-room.hz+0.5||z>room.hz-0.5)return true;
+    for(const p of props){const b=p.box; if(x>b.minx-0.4&&x<b.maxx+0.4&&z>b.minz-0.4&&z<b.maxz+0.4)return true;}
+    return false;
+  }
+
+  let walkT=0; const v3=new THREE.Vector3();
+  function frame(){
+    if(keys['arrowleft'])theta+=0.03; if(keys['arrowright'])theta-=0.03;
+    const F=new THREE.Vector2(-Math.sin(theta),-Math.cos(theta));
+    const R=new THREE.Vector2(-Math.cos(theta),Math.sin(theta));
+    let mx=0,mz=0;
+    if(keys['w']||keys['arrowup']){mx+=F.x;mz+=F.y;}
+    if(keys['s']||keys['arrowdown']){mx-=F.x;mz-=F.y;}
+    if(keys['d']){mx+=R.x;mz+=R.y;}
+    if(keys['a']){mx-=R.x;mz-=R.y;}
+    const m=Math.hypot(mx,mz);
+    if(m>0.001){
+      mx/=m;mz/=m; const sp=0.09;
+      const nx=player.position.x+mx*sp, nz=player.position.z+mz*sp;
+      if(!blocked(nx,player.position.z))player.position.x=nx;
+      if(!blocked(player.position.x,nz))player.position.z=nz;
+      player.rotation.y=Math.atan2(mx,mz);
+      walkT+=0.25; const sw=Math.sin(walkT)*0.5; legL.rotation.x=sw; legR.rotation.x=-sw; armL.rotation.x=-sw; armR.rotation.x=sw;
+    } else { legL.rotation.x*=0.7;legR.rotation.x*=0.7;armL.rotation.x*=0.7;armR.rotation.x*=0.7; }
+
+    const cx=player.position.x+Math.sin(theta)*dist, cz=player.position.z+Math.cos(theta)*dist;
+    camera.position.lerp(v3.set(cx,camH,cz),0.15);
+    camera.lookAt(player.position.x,1.4,player.position.z);
+
+    const near=nearest(), r=renderer.domElement.getBoundingClientRect();
+    props.forEach(p=>{
+      const on=p===near;
+      p.meshes.forEach(me=>me.material.emissive&&me.material.emissive.setHex(on?0x335577:0x000000));
+      v3.set((p.box.minx+p.box.maxx)/2,p.labelY,(p.box.minz+p.box.maxz)/2).project(camera);
+      if(v3.z>1){p.el.style.display='none';}
+      else{p.el.style.display='block'; p.el.style.left=(v3.x*0.5+0.5)*r.width+'px'; p.el.style.top=(-v3.y*0.5+0.5)*r.height+'px';
+        p.el.style.background=on?'#1d6b8a':'rgba(255,255,255,0.92)'; p.el.style.color=on?'#fff':'#4a4640';}
+    });
+    hint.textContent=near?('Press E or click to open · '+near.label):''; hint.style.opacity=near?1:0;
+
+    renderer.render(scene,camera);
+    requestAnimationFrame(frame);
+  }
+  size(); addEventListener('resize',size); frame();
+})();
+</script>
+</body>
+</html>
