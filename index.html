@@ -51,6 +51,7 @@
     desk:  'https://sattvitripathy.github.io/Momentum/',        // Momentum (pomodoro app)
     plant: 'https://sattvitripathy.github.io/materiality-map/', // Materiality Map (ESG)
     shelf: 'https://sattvitripathy.github.io/portfolio/',       // Portfolio
+    clock: '',                                                  // Tick Tock — set the demo URL here
     board: ''                                                   // open slot for your next project
   };
   // -----------------------------------------------------------------
@@ -133,6 +134,14 @@
     part(g,m,new THREE.BoxGeometry(0.13,0.05,1.2),mat(0xc95b4b),-7.65,1.6,-0.1);
   });
 
+  addProp('clock','Tick Tock','a clock app',2.95,{minx:-3.65,maxx:-2.35,minz:-6.0,maxz:-5.4},(g,m)=>{
+    const z0=-room.hz+0.16;
+    const body=part(g,m,new THREE.CylinderGeometry(0.52,0.52,0.12,30),mat(0x2a2f38),-3,2.15,z0); body.rotation.x=Math.PI/2;
+    const face=part(g,m,new THREE.CylinderGeometry(0.44,0.44,0.06,30),mat(0xf4f1e8),-3,2.15,z0+0.05); face.rotation.x=Math.PI/2;
+    part(g,m,new THREE.BoxGeometry(0.045,0.30,0.02),mat(0x2a2f38),-3,2.27,z0+0.10);   // hour hand (up)
+    part(g,m,new THREE.BoxGeometry(0.18,0.035,0.02),mat(0xc0392b),-2.90,2.15,z0+0.10); // minute hand (right)
+  });
+
   props.forEach(p=>{const el=document.createElement('div'); el.className='label'; el.textContent=p.label; labelsEl.appendChild(el); p.el=el;});
 
   const player=new THREE.Group(); scene.add(player);
@@ -194,7 +203,7 @@
   function frame(){
     if(keys['arrowleft'])theta+=0.03; if(keys['arrowright'])theta-=0.03;
     const F=new THREE.Vector2(-Math.sin(theta),-Math.cos(theta));
-    const R=new THREE.Vector2(-Math.cos(theta),Math.sin(theta));
+    const R=new THREE.Vector2(Math.cos(theta),-Math.sin(theta));
     let mx=0,mz=0;
     if(keys['w']||keys['arrowup']){mx+=F.x;mz+=F.y;}
     if(keys['s']||keys['arrowdown']){mx-=F.x;mz-=F.y;}
