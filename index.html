@@ -28,6 +28,13 @@
   #intro h1{font:600 30px system-ui;margin:0 0 8px;}
   #intro p{font:400 15px system-ui;opacity:0.88;margin:0 0 24px;max-width:300px;line-height:1.55;}
   #enter{font:600 16px system-ui;color:#1d2630;background:#fff;border:none;padding:14px 30px;border-radius:26px;cursor:pointer;box-shadow:0 4px 18px rgba(0,0,0,0.3);}
+  #contactPanel{position:fixed;inset:0;z-index:12;display:none;align-items:center;justify-content:center;background:rgba(22,30,40,0.5);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
+  #contactPanel .cbox{position:relative;background:#fff;border-radius:16px;padding:26px 26px 22px;width:280px;text-align:center;box-shadow:0 12px 44px rgba(0,0,0,0.32);}
+  #contactPanel h2{font:600 20px system-ui;margin:0 0 4px;color:#1d2630;}
+  #contactPanel .csub{font:400 13px system-ui;color:#6b7280;margin:0 0 16px;}
+  #contactPanel a.cbtn{display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;font:600 15px system-ui;padding:12px;border-radius:12px;margin:8px 0;color:#fff;}
+  #cEmail{background:#1d6b8a;} #cLinkedin{background:#0a66c2;}
+  #cClose{position:absolute;top:6px;right:12px;border:none;background:none;font-size:24px;line-height:1;color:#9aa1aa;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -37,6 +44,13 @@
 <div id="banner"></div>
 <button id="openbtn"></button>
 <div id="joy"><div id="knob"></div></div>
+<div id="contactPanel"><div class="cbox">
+  <button id="cClose" aria-label="Close">&times;</button>
+  <h2>Get in touch</h2>
+  <p class="csub">Happy to connect</p>
+  <a class="cbtn" id="cEmail" href="mailto:sattvitripathy@outlook.com">&#9993; &nbsp;Email me</a>
+  <a class="cbtn" id="cLinkedin" href="https://www.linkedin.com/in/sattvitripathy/" target="_blank" rel="noopener">in &nbsp;LinkedIn</a>
+</div></div>
 <div id="loading">Loading 3D scene…</div>
 <div id="intro"><h1>Sattvi's office</h1><p>Walk around and step up to anything that catches your eye to open it.</p><button id="enter">Enter the room &rsaquo;</button></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -108,13 +122,26 @@
   function mat(c){return new THREE.MeshStandardMaterial({color:c});}
   function part(g,meshes,geo,m,x,y,z){const me=new THREE.Mesh(geo,m); me.position.set(x,y,z); me.castShadow=true; me.receiveShadow=true; g.add(me); meshes.push(me); return me;}
 
-  addProp('desk','Momentum','pomodoro productivity app',1.7,{minx:-1.6,maxx:1.6,minz:-5.7,maxz:-4.3},(g,m)=>{
-    part(g,m,new THREE.BoxGeometry(3,0.15,1.2),mat(0x6b5b8a),0,1.0,-5);
-    part(g,m,new THREE.BoxGeometry(0.15,1.0,1.0),mat(0x5a4b78),-1.35,0.5,-5);
-    part(g,m,new THREE.BoxGeometry(0.15,1.0,1.0),mat(0x5a4b78),1.35,0.5,-5);
-    part(g,m,new THREE.BoxGeometry(1.0,0.6,0.08),mat(0x2a2740),0,1.45,-5.2);
-    part(g,m,new THREE.BoxGeometry(0.9,0.5,0.02),mat(0x8fd3ff),0,1.45,-5.15);
-    part(g,m,new THREE.BoxGeometry(0.6,0.04,0.3),mat(0x3a3550),0,1.1,-4.7);
+  addProp('desk','Momentum','pomodoro productivity app',1.95,{minx:-2.5,maxx:2.5,minz:-5.85,maxz:-4.15},(g,m)=>{
+    const wood=0x6e4a28, woodDark=0x4f3318, gold=0xc9a94c;
+    part(g,m,new THREE.BoxGeometry(5.0,0.18,1.7),mat(wood),0,1.0,-5.0);              // desktop
+    part(g,m,new THREE.BoxGeometry(4.4,0.02,1.15),mat(0x24503a),0,1.10,-5.0);        // green leather inlay
+    part(g,m,new THREE.BoxGeometry(1.0,0.92,1.6),mat(woodDark),-1.9,0.46,-5.0);      // left pedestal
+    part(g,m,new THREE.BoxGeometry(1.0,0.92,1.6),mat(woodDark), 1.9,0.46,-5.0);      // right pedestal
+    part(g,m,new THREE.BoxGeometry(2.8,0.78,0.12),mat(woodDark),0,0.5,-4.3);         // modesty panel
+    for(let i=0;i<3;i++){const y=0.78-i*0.27; part(g,m,new THREE.BoxGeometry(0.34,0.04,0.05),mat(gold),-1.9,y,-4.22); part(g,m,new THREE.BoxGeometry(0.34,0.04,0.05),mat(gold),1.9,y,-4.22);}
+    part(g,m,new THREE.BoxGeometry(1.0,0.6,0.08),mat(0x222230),0,1.45,-5.35);        // monitor
+    part(g,m,new THREE.BoxGeometry(0.9,0.5,0.02),mat(0x8fd3ff),0,1.45,-5.30);        // screen
+    part(g,m,new THREE.BoxGeometry(0.16,0.16,0.06),mat(0x222230),0,1.17,-5.35);      // monitor stand
+    part(g,m,new THREE.BoxGeometry(0.62,0.04,0.28),mat(0x33384a),0,1.11,-4.8);       // keyboard
+  });
+  addProp('contact','Contact me','email & linkedin',1.55,{minx:-2.15,maxx:-1.05,minz:-5.1,maxz:-4.2},(g,m)=>{
+    const gold=0xc9a94c;
+    part(g,m,new THREE.BoxGeometry(0.6,0.07,0.16),mat(0x2c241d),-1.6,1.13,-4.65);    // nameplate base
+    const plate=part(g,m,new THREE.BoxGeometry(0.58,0.18,0.03),mat(gold),-1.6,1.22,-4.61); plate.rotation.x=-0.55;
+    part(g,m,new THREE.BoxGeometry(0.36,0.06,0.24),mat(0x2c241d),-1.05,1.13,-4.55);  // card-holder tray
+    const c1=part(g,m,new THREE.BoxGeometry(0.3,0.02,0.2),mat(0xf6f2e9),-1.05,1.17,-4.55); c1.rotation.x=-0.4;
+    const c2=part(g,m,new THREE.BoxGeometry(0.3,0.02,0.2),mat(0xe7e0cf),-1.05,1.19,-4.58); c2.rotation.x=-0.4;
   });
   addProp('plant','Materiality map','ESG solution',1.6,{minx:4.4,maxx:5.6,minz:3.4,maxz:4.6},(g,m)=>{
     part(g,m,new THREE.CylinderGeometry(0.35,0.28,0.6,12),mat(0xb07d4b),5,0.3,4);
@@ -169,6 +196,9 @@
   function pt(e){const r=renderer.domElement.getBoundingClientRect(); return {x:e.clientX-r.left,y:e.clientY-r.top,w:r.width,h:r.height};}
   const coarse=matchMedia('(pointer:coarse)').matches;
   const openbtn=document.getElementById('openbtn'); openbtn.addEventListener('click',e=>{e.preventDefault();interact();});
+  const contactPanel=document.getElementById('contactPanel');
+  document.getElementById('cClose').addEventListener('click',()=>contactPanel.style.display='none');
+  contactPanel.addEventListener('click',e=>{if(e.target===contactPanel)contactPanel.style.display='none';});
 
   // on-screen movement joystick (fixed, bottom-left)
   const joyEl=document.getElementById('joy'), knob=document.getElementById('knob'), JR=46;
@@ -195,7 +225,7 @@
     return false;
   }
   function nearest(){let best=null,bd=1e9; for(const p of props){const cx=(p.box.minx+p.box.maxx)/2,cz=(p.box.minz+p.box.maxz)/2; const d=Math.hypot(player.position.x-cx,player.position.z-cz); const reach=Math.max(p.box.maxx-p.box.minx,p.box.maxz-p.box.minz)/2+1.6; if(d<reach&&d<bd){bd=d;best=p;}} return best;}
-  function interact(){const p=nearest(); if(!p)return; const url=LINKS[p.id]; if(url&&!url.includes('YOUR_USERNAME')){window.open(url,'_blank');} else {showBanner('Would open: '+p.label+'  ·  set its link in the LINKS map');}}
+  function interact(){const p=nearest(); if(!p)return; if(p.id==='contact'){contactPanel.style.display='flex';return;} const url=LINKS[p.id]; if(url&&!url.includes('YOUR_USERNAME')){window.open(url,'_blank');} else {showBanner('Would open: '+p.label+'  ·  set its link in the LINKS map');}}
   function showBanner(t){banner.textContent=t;banner.style.opacity=1;clearTimeout(showBanner._t);showBanner._t=setTimeout(()=>banner.style.opacity=0,2400);}
 
   function blocked(x,z){
