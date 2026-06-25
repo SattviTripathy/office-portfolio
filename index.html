@@ -66,6 +66,8 @@
     plant: 'https://sattvitripathy.github.io/materiality-map/', // Materiality Map (ESG)
     shelf: 'https://sattvitripathy.github.io/portfolio/',       // Portfolio
     clock: 'https://sattvitripathy.github.io/age-counter/',     // Tick Tock (age calculator)
+    calendar:'https://sattvitripathy.github.io/mundane/',       // Mundane (routine tasks PWA)
+    moor:  'https://sattvitripathy.github.io/moor/',            // Moor (calm exercises)
     board: ''                                                   // open slot for your next project
   };
   // -----------------------------------------------------------------
@@ -172,6 +174,22 @@
     handMin =hand(0.34,0.035,0x2a2f38);
     handSec =hand(0.40,0.016,0xc0392b);
     const cap=part(g,m,new THREE.CylinderGeometry(0.045,0.045,0.06,14),mat(0xc0392b),cx,cy,zf+0.02); cap.rotation.x=Math.PI/2;
+  });
+
+  addProp('calendar','Mundane','routine task PWA',2.72,{minx:-8.0,maxx:-7.4,minz:-4.25,maxz:-2.75},(g,m)=>{
+    const x0=-7.85, cz=-3.5;
+    part(g,m,new THREE.BoxGeometry(0.12,1.1,0.92),mat(0xf6f3ea),x0,1.95,cz);            // paper
+    part(g,m,new THREE.BoxGeometry(0.13,0.24,0.92),mat(0xc0392b),x0,2.38,cz);           // month header
+    for(let r=0;r<4;r++){part(g,m,new THREE.BoxGeometry(0.13,0.012,0.84),mat(0xcfc6b0),x0+0.005,2.18-r*0.22,cz);}
+    for(let c=0;c<6;c++){part(g,m,new THREE.BoxGeometry(0.13,0.78,0.012),mat(0xcfc6b0),x0+0.005,1.78,cz-0.35+c*0.14);}
+    part(g,m,new THREE.BoxGeometry(0.14,0.08,0.08),mat(0xc0392b),x0+0.01,1.85,cz+0.05); // "today" marker
+  });
+  addProp('moor','Moor','calm & breathing',1.05,{minx:-5.65,maxx:-4.35,minz:3.35,maxz:4.65},(g,m)=>{
+    const cx=-5, cz=4;
+    part(g,m,new THREE.CylinderGeometry(0.55,0.6,0.2,22),mat(0x5b7fa6),cx,0.1,cz);      // floor cushion (zabuton)
+    part(g,m,new THREE.CylinderGeometry(0.33,0.36,0.22,20),mat(0x8fb0c9),cx,0.3,cz);    // round zafu
+    part(g,m,new THREE.CylinderGeometry(0.07,0.08,0.16,12),mat(0xf2ead2),cx+0.78,0.08,cz+0.25);  // candle
+    part(g,m,new THREE.SphereGeometry(0.04,8,6),new THREE.MeshBasicMaterial({color:0xffcf66}),cx+0.78,0.2,cz+0.25); // flame
   });
 
   props.forEach(p=>{const el=document.createElement('div'); el.className='label'; el.textContent=p.label; labelsEl.appendChild(el); p.el=el;});
