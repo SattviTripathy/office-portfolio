@@ -62,12 +62,10 @@
   // ---- EDIT THIS: map each prop to one of your GitHub projects ----
   // Set `url` to open the real project. Leave '' to just show a placeholder banner.
   const LINKS = {
-    desk:  'https://sattvitripathy.github.io/Momentum/',        // Momentum (pomodoro app)
-    plant: 'https://sattvitripathy.github.io/materiality-map/', // Materiality Map (ESG)
+    desk:  'https://sattvitripathy.github.io/materiality-map/', // ESG reporting (materiality map)
+    plant: 'https://sattvitripathy.github.io/meridian/',        // Meridian (vegetation mgmt)
     shelf: 'https://sattvitripathy.github.io/portfolio/',       // Portfolio
-    clock: 'https://sattvitripathy.github.io/age-counter/',     // Tick Tock (age calculator)
-    calendar:'https://sattvitripathy.github.io/mundane/',       // Mundane (routine tasks PWA)
-    moor:  'https://sattvitripathy.github.io/moor/',            // Moor (calm exercises)
+    calendar:'https://sattvitripathy.github.io/Momentum/',      // Momentum (task/pomodoro)
     board: ''                                                   // open slot for your next project
   };
   // -----------------------------------------------------------------
@@ -192,7 +190,7 @@
   function mat(c){return new THREE.MeshStandardMaterial({color:c});}
   function part(g,meshes,geo,m,x,y,z){const me=new THREE.Mesh(geo,m); me.position.set(x,y,z); me.castShadow=true; me.receiveShadow=true; g.add(me); meshes.push(me); return me;}
 
-  addProp('desk','Momentum','pomodoro productivity app',1.95,{minx:-2.5,maxx:2.5,minz:-5.85,maxz:-4.15},(g,m)=>{
+  addProp('desk','ESG reporting','materiality & disclosure',1.95,{minx:-2.5,maxx:2.5,minz:-5.85,maxz:-4.15},(g,m)=>{
     const wood=0x6e4a28, woodDark=0x4f3318, gold=0xc9a94c;
     part(g,m,new THREE.BoxGeometry(5.0,0.18,1.7),mat(wood),0,1.0,-5.0);              // desktop
     part(g,m,new THREE.BoxGeometry(4.4,0.02,1.15),mat(0x24503a),0,1.10,-5.0);        // green leather inlay
@@ -213,7 +211,7 @@
     const c1=part(g,m,new THREE.BoxGeometry(0.3,0.02,0.2),mat(0xf6f2e9),-1.05,1.17,-4.55); c1.rotation.x=-0.4;
     const c2=part(g,m,new THREE.BoxGeometry(0.3,0.02,0.2),mat(0xe7e0cf),-1.05,1.19,-4.58); c2.rotation.x=-0.4;
   });
-  addProp('plant','Materiality map','ESG solution',1.6,{minx:4.4,maxx:5.6,minz:3.4,maxz:4.6},(g,m)=>{
+  addProp('plant','Meridian','vegetation risk dashboard',1.6,{minx:4.4,maxx:5.6,minz:3.4,maxz:4.6},(g,m)=>{
     part(g,m,new THREE.CylinderGeometry(0.35,0.28,0.6,12),mat(0xb07d4b),5,0.3,4);
     part(g,m,new THREE.SphereGeometry(0.55,12,10),mat(0x2f8f5b),5,1.0,4);
     part(g,m,new THREE.SphereGeometry(0.35,10,8),mat(0x3aa869),4.7,1.35,4.1);
@@ -231,33 +229,13 @@
     part(g,m,new THREE.BoxGeometry(0.13,0.05,1.2),mat(0xc95b4b),-7.65,1.6,-0.1);
   });
 
-  let handHour,handMin,handSec;
-  addProp('clock','Tick Tock','age calculator · IST',2.45,{minx:-7.0,maxx:-6.0,minz:-5.5,maxz:-4.5},(g,m)=>{
-    const cx=-6.5, cz=-5.0, cy=1.88, zf=cz+0.12;
-    part(g,m,new THREE.CylinderGeometry(0.34,0.4,0.06,28),mat(0x222831),cx,0.03,cz);                    // base
-    part(g,m,new THREE.CylinderGeometry(0.035,0.035,1.72,16),mat(0xc2c8ce),cx,0.9,cz);                  // chrome stem
-    const rim=part(g,m,new THREE.CylinderGeometry(0.3,0.3,0.07,36),mat(0x222831),cx,cy,cz); rim.rotation.x=Math.PI/2;
-    const face=part(g,m,new THREE.CylinderGeometry(0.265,0.265,0.04,36),mat(0xf7f7f4),cx,cy,zf); face.rotation.x=Math.PI/2;
-    for(let i=0;i<4;i++){const a=i/4*Math.PI*2; part(g,m,new THREE.BoxGeometry(0.022,0.055,0.02),mat(0x222831),cx+Math.sin(a)*0.225,cy+Math.cos(a)*0.225,zf+0.02);}
-    function hand(len,w,col){const grp=new THREE.Group(); grp.position.set(cx,cy,zf+0.035); const me=new THREE.Mesh(new THREE.BoxGeometry(w,len,0.012),mat(col)); me.position.y=len/2-0.03; me.castShadow=true; grp.add(me); g.add(grp); return grp;}
-    handHour=hand(0.15,0.022,0x222831); handMin=hand(0.22,0.017,0x222831); handSec=hand(0.24,0.009,0xc0392b);
-    const cap=part(g,m,new THREE.CylinderGeometry(0.025,0.025,0.05,12),mat(0x222831),cx,cy,zf+0.05); cap.rotation.x=Math.PI/2;
-  });
-
-  addProp('calendar','Mundane','routine task PWA',2.72,{minx:-8.0,maxx:-7.4,minz:-4.25,maxz:-2.75},(g,m)=>{
+  addProp('calendar','Momentum','task & pomodoro tracker',2.72,{minx:-8.0,maxx:-7.4,minz:-4.25,maxz:-2.75},(g,m)=>{
     const x0=-7.85, cz=-3.5;
     part(g,m,new THREE.BoxGeometry(0.12,1.1,0.92),mat(0xf6f3ea),x0,1.95,cz);            // paper
     part(g,m,new THREE.BoxGeometry(0.13,0.24,0.92),mat(0xc0392b),x0,2.38,cz);           // month header
     for(let r=0;r<4;r++){part(g,m,new THREE.BoxGeometry(0.13,0.012,0.84),mat(0xcfc6b0),x0+0.005,2.18-r*0.22,cz);}
     for(let c=0;c<6;c++){part(g,m,new THREE.BoxGeometry(0.13,0.78,0.012),mat(0xcfc6b0),x0+0.005,1.78,cz-0.35+c*0.14);}
     part(g,m,new THREE.BoxGeometry(0.14,0.08,0.08),mat(0xc0392b),x0+0.01,1.85,cz+0.05); // "today" marker
-  });
-  addProp('moor','Moor','calm & breathing',1.05,{minx:-5.65,maxx:-4.35,minz:3.35,maxz:4.65},(g,m)=>{
-    const cx=-5, cz=4;
-    part(g,m,new THREE.CylinderGeometry(0.55,0.6,0.2,22),mat(0x5b7fa6),cx,0.1,cz);      // floor cushion (zabuton)
-    part(g,m,new THREE.CylinderGeometry(0.33,0.36,0.22,20),mat(0x8fb0c9),cx,0.3,cz);    // round zafu
-    part(g,m,new THREE.CylinderGeometry(0.07,0.08,0.16,12),mat(0xf2ead2),cx+0.78,0.08,cz+0.25);  // candle
-    part(g,m,new THREE.SphereGeometry(0.04,8,6),new THREE.MeshBasicMaterial({color:0xffcf66}),cx+0.78,0.2,cz+0.25); // flame
   });
 
   props.forEach(p=>{const el=document.createElement('div'); el.className='label'; el.textContent=p.label; labelsEl.appendChild(el); p.el=el;});
@@ -358,9 +336,6 @@
     });
     if(near){ if(coarse){openbtn.style.display='block';openbtn.textContent='Open · '+near.label;} else {hint.textContent='Press E or click to open · '+near.label;hint.style.opacity=1;} }
     else { openbtn.style.display='none'; if(!coarse)hint.style.opacity=0; }
-
-    if(handSec){const d=new Date(Date.now()+5.5*3600000),s=d.getUTCSeconds()+d.getUTCMilliseconds()/1000,mn=d.getUTCMinutes()+s/60,hr=(d.getUTCHours()%12)+mn/60;
-      handSec.rotation.z=-s/60*Math.PI*2; handMin.rotation.z=-mn/60*Math.PI*2; handHour.rotation.z=-hr/12*Math.PI*2;}
 
     renderer.render(scene,camera);
     requestAnimationFrame(frame);
